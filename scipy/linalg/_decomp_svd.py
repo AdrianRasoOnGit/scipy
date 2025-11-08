@@ -74,38 +74,45 @@ def svd(a, full_matrices=True, compute_uv=True, overwrite_a=False,
 
     Examples
     --------
+    We will start showing how to compute a full SVD decomposition, with
+    ``full_matrices=True``. First, create the matrix:
+    
     >>> import numpy as np
     >>> from scipy import linalg
     >>> rng = np.random.default_rng()
     >>> m, n = 9, 6
     >>> a = rng.standard_normal((m, n)) + 1.j*rng.standard_normal((m, n))
+
+    Then, compute the full SVD decomposition:
+    
     >>> U, s, Vh = linalg.svd(a)
     >>> U.shape,  s.shape, Vh.shape
     ((9, 9), (6,), (6, 6))
 
-    Reconstruct the original matrix from the decomposition:
+    It is possible to reconstruct the original matrix from the decomposition:
 
     >>> sigma = np.zeros((m, n))
     >>> for i in range(min(m, n)):
     ...     sigma[i, i] = s[i]
-    >>> a1 = np.dot(U, np.dot(sigma, Vh))
+    >>> a1 = U @ sigma @ Vh
     >>> np.allclose(a, a1)
     True
 
-    Alternatively, use ``full_matrices=False`` (notice that the shape of
-    ``U`` is then ``(m, n)`` instead of ``(m, m)``):
+    Alternatively, using ``full_matrices=False`` computes
+    a reduced SVD:
 
     >>> U, s, Vh = linalg.svd(a, full_matrices=False)
     >>> U.shape, s.shape, Vh.shape
     ((9, 6), (6,), (6, 6))
     >>> S = np.diag(s)
-    >>> np.allclose(a, np.dot(U, np.dot(S, Vh)))
+    >>> np.allclose(a, U @ S @ Vh)
     True
+
+    It is also possible to compute only the singular values, using ``compute_uv=False``:
 
     >>> s2 = linalg.svd(a, compute_uv=False)
     >>> np.allclose(s, s2)
     True
-
     """
     a1 = _asarray_validated(a, check_finite=check_finite)
     if len(a1.shape) != 2:
